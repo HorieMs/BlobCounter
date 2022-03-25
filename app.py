@@ -6,6 +6,17 @@ from PIL import Image
 import datetime
 import plotly.graph_objs as go
 
+st.set_page_config(
+     page_title="Blob counter",
+     page_icon="🧫",
+     layout="wide",
+     initial_sidebar_state="auto",
+     menu_items={
+         'Get Help': 'https://koumyou.org/',
+         'Report a bug': "https://koumyou.org/",
+         'About': "# This is a Blob counter app!"
+     }
+ )
 
 # Blobパラメータの初期化
 params = cv2.SimpleBlobDetector_Params() 
