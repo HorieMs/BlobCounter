@@ -8,7 +8,8 @@ import plotly.graph_objs as go
 
 st.set_page_config(
      page_title="Blob counter",
-     page_icon="🧫",
+     #page_icon="⛓️",
+     page_icon="⛆",
      layout="wide",
      initial_sidebar_state="auto",
      menu_items={
@@ -21,12 +22,12 @@ st.set_page_config(
 # Blobパラメータの初期化
 params = cv2.SimpleBlobDetector_Params() 
 
-# color_enhancement_menu=('None','Hue rotation','Hue extraction')
-# color_enhancement_mode=color_enhancement_menu[0]
-# h_offset=5     # 色相回転角[deg], 0のときは、色相抽出
-# hsv_gain=np.array([1.0,1.0,1.0])
-# h_ext_center=90     # 色相抽出角[deg],0-360
-# h_ext_hrange=90     # 色相抽出角[deg. ] h_ext_center-h_ext_hrange ...　h_ext_center+h_ext_hrange の範囲のみを抽出
+color_enhancement_menu=('None','Hue rotation','Hue extraction')
+color_enhancement_mode=color_enhancement_menu[0]
+h_offset=0     # 色相回転角[deg], 0のときは、色相抽出
+hsv_gain=np.array([1.0,1.0,1.0])
+h_ext_center=90     # 色相抽出角[deg],0-360
+h_ext_hrange=90     # 色相抽出角[deg. ] h_ext_center-h_ext_hrange ...　h_ext_center+h_ext_hrange の範囲のみを抽出
 
 
 
@@ -64,9 +65,9 @@ def simple_blob(image):
     # ブロブの個数  
     count = len(kp) 
     #print(f'丸の個数: {count}')
-    text=f"{count:>6d} Blob"
+    text=f"{count:d} Blob"
     org=(0,int(blobs.shape[0]*0.98))
-    blobs=cv2.putText(blobs, text, org, fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=4, color=(255,0,0))
+    blobs=cv2.putText(blobs, text, org, fontFace=cv2.FONT_HERSHEY_COMPLEX, fontScale=4, color=(255,0,0))
 
 
     
@@ -111,63 +112,80 @@ def simple_blob(image):
     st.plotly_chart(fig, use_container_width=True)
 
 
-# def color_enhancement(img):
-#     hsv_img=cv2.cvtColor(img, cv2.COLOR_BGR2HSV_FULL) # H最大値255で変換した結果
+def color_enhancement(img):
+    hsv_img=cv2.cvtColor(img, cv2.COLOR_BGR2HSV_FULL) # H最大値255で変換した結果
 
-#     enh_hsv_img=np.empty(hsv_img.shape,dtype='uint8')
+    enh_hsv_img=np.empty(hsv_img.shape,dtype='uint8')
 
-#     if color_enhancement_mode==color_enhancement_menu[1]:
-#         # 色相回転の場合
-#         if h_offset!=0:
-#             enh_h=np.uint16((np.round((hsv_img[:,:,0]+h_offset)*hsv_gain[0])))%256
-#         enh_s=np.clip(np.round(hsv_gain[1]*hsv_img[:,:,1]),0,255)
-#         enh_v=np.clip(np.round(hsv_gain[2]*hsv_img[:,:,2]),0,255)
-#     else:
-#         # 色相抽出の場合
-#         h_start=np.int16(np.round(255*(h_ext_center-h_ext_hrange)/360))
-#         h_end=np.int16(np.round(255*(h_ext_center+h_ext_hrange)/360))
-#         enh_h=hsv_img[:,:,0]
-#         enh_s=hsv_img[:,:,1]
-#         enh_v=hsv_img[:,:,2]
-#         if (h_start>=0) and (h_end<=255):
-#             bin_img=(hsv_img[:,:,0]<h_start) | (hsv_img[:,:,0]>h_end)
-#             enh_v[bin_img]=0
-#         elif (h_start<0) and (h_end<=255):
-#             h_start=255+h_start
-#             bin_img=(hsv_img[:,:,0]>h_end) & (hsv_img[:,:,0]<h_start)
-#             enh_v[bin_img]=0
-#         elif (h_start>=0) and (h_end>255):
-#             h_end=(h_end % 256)
-#             bin_img=(hsv_img[:,:,0]>h_end) & (hsv_img[:,:,0]<h_start)
-#             enh_v[bin_img]=0
-#         else:
-#             pass
+    if color_enhancement_mode==color_enhancement_menu[1]:
+        # 色相回転の場合
+        enh_h=np.uint16((np.round((hsv_img[:,:,0]+h_offset)*hsv_gain[0])))%256
+        enh_s=np.clip(np.round(hsv_gain[1]*hsv_img[:,:,1]),0,255)
+        enh_v=np.clip(np.round(hsv_gain[2]*hsv_img[:,:,2]),0,255)
+    else:
+        # 色相抽出の場合
+        h_start=np.int16(np.round(255*(h_ext_center-h_ext_hrange)/360))
+        h_end=np.int16(np.round(255*(h_ext_center+h_ext_hrange)/360))
+        enh_h=hsv_img[:,:,0]
+        enh_s=hsv_img[:,:,1]
+        enh_v=hsv_img[:,:,2]
+        if (h_start>=0) and (h_end<=255):
+            bin_img=(hsv_img[:,:,0]<h_start) | (hsv_img[:,:,0]>h_end)
+            enh_v[bin_img]=0
+        elif (h_start<0) and (h_end<=255):
+            h_start=255+h_start
+            bin_img=(hsv_img[:,:,0]>h_end) & (hsv_img[:,:,0]<h_start)
+            enh_v[bin_img]=0
+        elif (h_start>=0) and (h_end>255):
+            h_end=(h_end % 256)
+            bin_img=(hsv_img[:,:,0]>h_end) & (hsv_img[:,:,0]<h_start)
+            enh_v[bin_img]=0
+        else:
+            pass
 
-#         enh_s=np.clip(np.round(hsv_gain[1]*enh_s),0,255)
-#         enh_v=np.clip(np.round(hsv_gain[2]*enh_v),0,255)
+        enh_s=np.clip(np.round(hsv_gain[1]*enh_s),0,255)
+        enh_v=np.clip(np.round(hsv_gain[2]*enh_v),0,255)
 
-#     enh_hsv_img[:,:,0]=np.uint8(enh_h)
-#     enh_hsv_img[:,:,1]=np.uint8(enh_s)
-#     enh_hsv_img[:,:,2]=np.uint8(enh_v)
+    enh_hsv_img[:,:,0]=np.uint8(enh_h)
+    enh_hsv_img[:,:,1]=np.uint8(enh_s)
+    enh_hsv_img[:,:,2]=np.uint8(enh_v)
 
-#     enh_bgr_img=cv2.cvtColor(enh_hsv_img, cv2.COLOR_HSV2BGR_FULL) # H最大値255で変換した結果
-#     return enh_bgr_img
-
+    enh_bgr_img=cv2.cvtColor(enh_hsv_img, cv2.COLOR_HSV2BGR_FULL) # H最大値255で変換した結果
+    return enh_bgr_img
 
 
-def disp_sidebar():
 
-    st.sidebar.header('Parameters')
-    # st.sidebar.subheader('Color enhancement')
+if __name__ == "__main__":
+    st.header("Blob counter")
 
-    # if color_enhancement_mode==color_enhancement_menu[0]:
-    #     index=0
-    # elif color_enhancement_mode==color_enhancement_menu[1]:
-    #     index=1
-    # else:
-    #     index=2
+    st.subheader('Demo software for OpenCV and streamlit')
+
     
-    # color_enhancement_mode=st.sidebar.selectbox('Mode', options=color_enhancement_menu)
+    
+    st.sidebar.header('Parameters')
+    
+    st.sidebar.subheader('Color enhancement')
+
+    if color_enhancement_mode==color_enhancement_menu[0]:
+        index=0
+    elif color_enhancement_mode==color_enhancement_menu[1]:
+        index=1
+    else:
+        index=2
+ 
+    color_enhancement_mode=st.sidebar.selectbox('Mode', index=index,options=color_enhancement_menu)
+    if color_enhancement_mode==color_enhancement_menu[1]:
+        h_offset=st.sidebar.slider('Hue rotation [deg]',min_value=-180,max_value=180,value=h_offset,step=5,key='h_offset')
+    elif color_enhancement_mode==color_enhancement_menu[2]:
+        # 色相抽出角[deg],0-360
+        h_ext_center=st.sidebar.slider('Hue [deg]',min_value=0,max_value=360,value=h_ext_center,step=5,key='h_ext_center')
+        # 色相抽出角[deg. ] h_ext_center-h_ext_hrange ...　h_ext_center+h_ext_hrange の範囲のみを抽出
+        h_ext_hrange=st.sidebar.slider('Range of Hue [deg]',min_value=5,max_value=180,value=h_ext_hrange,step=5,key='h_ext_hrange')
+    if color_enhancement_mode!=color_enhancement_menu[0]:
+        hsv_gain[1]=st.sidebar.slider('Staturation(Chorama)',min_value=0.0,max_value=2.0,value=float(hsv_gain[1]),step=0.1,key='saturation')
+        hsv_gain[2]=st.sidebar.slider('Value(Brightness)',min_value=0.1,max_value=2.0,value=float(hsv_gain[2]),step=0.1,key='value')
+ 
+
 
     st.sidebar.header('Blob')
 
@@ -233,14 +251,21 @@ def disp_sidebar():
 
 
 
-if __name__ == "__main__":
-    st.header("Blob counter")
 
-    st.subheader('Demo software for OpenCV and streamlit')
 
-    
-    disp_sidebar()
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
     st.write("Choose any image and count Blobs:")
 
     uploaded_img_file = st.file_uploader("Choose an image...",type=['jpg', 'jpeg', 'png'])
@@ -253,6 +278,8 @@ if __name__ == "__main__":
         img=pil2cv(Image.open(uploaded_img_file))
         #print(img.shape)
         #print(img.dtype)
+        if color_enhancement_mode!=color_enhancement_menu[0]:
+            img=color_enhancement(img)
 
         simple_blob(img)
 
