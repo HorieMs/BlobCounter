@@ -28,7 +28,7 @@ h_offset=0     # 色相回転角[deg], 0のときは、色相抽出
 hsv_gain=np.array([1.0,1.0,1.0])
 h_ext_center=90     # 色相抽出角[deg],0-360
 h_ext_hrange=90     # 色相抽出角[deg. ] h_ext_center-h_ext_hrange ...　h_ext_center+h_ext_hrange の範囲のみを抽出
-
+input_type=('File','Camera')
 
 
 @st.cache
@@ -163,7 +163,10 @@ if __name__ == "__main__":
     
     
     st.sidebar.header('Parameters')
-    
+
+    st.sidebar.subheader('Input')
+    InputType = st.sidebar.radio( "Input type",input_type, key='InputType')
+
     st.sidebar.subheader('Color enhancement')
 
     if color_enhancement_mode==color_enhancement_menu[0]:
@@ -268,14 +271,22 @@ if __name__ == "__main__":
 
     st.write("Choose any image and count Blobs:")
 
-    uploaded_img_file = st.file_uploader("Choose an image...",type=['jpg', 'jpeg', 'png'])
+    uploaded_img=None
+    if InputType==input_type[0]:
+        uploaded_img_file = st.file_uploader("Choose an image...",type=['jpg', 'jpeg', 'png'])
+        if uploaded_img_file is not None:
+            uploaded_img=uploaded_img_file
+            
+    if InputType==input_type[1]:
+        uploaded_img_cam = st.camera_input("Take a picture")
+        if uploaded_img_cam is not None:
+            uploaded_img=uploaded_img_cam
 
+    if uploaded_img is not None:
 
-    if uploaded_img_file is not None:
+        st.image(uploaded_img, caption='Input Image', use_column_width=True)
 
-        st.image(uploaded_img_file, caption='Input Image', use_column_width=True)
-
-        img=pil2cv(Image.open(uploaded_img_file))
+        img=pil2cv(Image.open(uploaded_img))
         #print(img.shape)
         #print(img.dtype)
         if color_enhancement_mode!=color_enhancement_menu[0]:
