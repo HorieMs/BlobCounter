@@ -31,12 +31,12 @@ h_ext_hrange=90     # 色相抽出角[deg. ] h_ext_center-h_ext_hrange ...　h_e
 input_type=('File','Camera')
 
 
-@st.cache
+@st.cache_data
 def convert_df(df):
      # IMPORTANT: Cache the conversion to prevent computation on every rerun
      return df.to_csv().encode('utf-8')
 
-@st.cache
+
 def pil2cv(image):
     ''' PIL型 -> OpenCV型 '''
     new_image = np.array(image, dtype=np.uint8)
